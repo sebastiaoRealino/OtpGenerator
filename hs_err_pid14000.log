@@ -1,0 +1,61 @@
+#
+# There is insufficient memory for the Java Runtime Environment to continue.
+# Native memory allocation (malloc) failed to allocate 348336 bytes for Chunk::new
+# Possible reasons:
+#   The system is out of physical RAM or swap space
+#   In 32 bit mode, the process size limit was hit
+# Possible solutions:
+#   Reduce memory load on the system
+#   Increase physical memory or swap space
+#   Check if swap backing store is full
+#   Use 64 bit Java on a 64 bit OS
+#   Decrease Java heap size (-Xmx/-Xms)
+#   Decrease number of Java threads
+#   Decrease Java thread stack sizes (-Xss)
+#   Set larger code cache with -XX:ReservedCodeCacheSize=
+# This output file may be truncated or incomplete.
+#
+#  Out of Memory Error (allocation.cpp:390), pid=14000, tid=0x00000000000038d8
+#
+# JRE version: OpenJDK Runtime Environment (8.0_152-b02) (build 1.8.0_152-release-1024-b02)
+# Java VM: OpenJDK 64-Bit Server VM (25.152-b02 mixed mode windows-amd64 compressed oops)
+# Failed to write core dump. Minidumps are not enabled by default on client versions of Windows
+#
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x000000001ab7f800):  JavaThread "C2 CompilerThread0" daemon [_thread_in_native, id=14552, stack(0x000000001b450000,0x000000001b550000)]
+
+Stack: [0x000000001b450000,0x000000001b550000]
+[error occurred during error reporting (printing stack bounds), id 0xc0000005]
+
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+
+
+Current CompileTask:
+C2: 249744 9955   !   4       java.nio.file.FileTreeWalker::next (144 bytes)
+
+
+---------------  P R O C E S S  ---------------
+
+Java Threads: ( => current thread )
+  0x000000001f45f000 JavaThread "Java2D Disposer" daemon [_thread_blocked, id=2056, stack(0x000000002c4a0000,0x000000002c5a0000)]
+  0x000000001bed8800 JavaThread "Worker Daemon Execution Thread 7" [_thread_blocked, id=17952, stack(0x000000002bba0000,0x000000002bca0000)]
+  0x000000001bed9000 JavaThread "Worker Daemon Execution Thread 6" [_thread_blocked, id=1568, stack(0x000000002baa0000,0x000000002bba0000)]
+  0x000000001bee0000 JavaThread "Worker Daemon Execution Thread 5" [_thread_blocked, id=15748, stack(0x000000002b9a0000,0x000000002baa0000)]
+  0x000000001bede800 JavaThread "Worker Daemon Execution Thread 4" [_thread_blocked, id=17728, stack(0x000000002b6a0000,0x000000002b7a0000)]
+  0x000000001bedd800 JavaThread "Worker Daemon Execution Thread 3" [_thread_blocked, id=4664, stack(0x000000002b5a0000,0x000000002b6a0000)]
+  0x000000001beda800 JavaThread "Worker Daemon Execution Thread 2" [_thread_blocked, id=1820, stack(0x000000002b4a0000,0x000000002b5a0000)]
+  0x000000001bedf000 JavaThread "Worker Daemon Execution" [_thread_blocked, id=11036, stack(0x000000002b3a0000,0x000000002b4a0000)]
+  0x000000001bedb800 JavaThread "Task worker for ':' Thread 7" [_thread_in_Java, id=10944, stack(0x000000002b2a0000,0x000000002b3a0000)]
+  0x000000001bed7000 JavaThread "Task worker for ':' Thread 6" [_thread_blocked, id=11268, stack(0x000000002b1a0000,0x000000002b2a0000)]
+  0x000000001bedd000 JavaThread "Task worker for ':' Thread 5" [_thread_blocked, id=17548, stack(0x000000002b0a0000,0x000000002b1a0000)]
+  0x000000001bedc000 JavaThread "Task worker for ':' Thread 4" [_thread_blocked, id=17888, stack(0x000000002afa0000,0x000000002b0a0000)]
+  0x000000001beda000 JavaThread "Task worker for ':' Thread 3" [_thread_blocked, id=6400, stack(0x000000002aea0000,0x000000002afa0000)]
+  0x000000001c122800 JavaThread "Task worker for ':' Thread 2" [_thread_blocked, id=17652, stack(0x000000002ada0000,0x000000002aea0000)]
+  0x000000001c122000 JavaThread "Task worker for ':'" [_thread_blocked, id=8984, stack(0x000000002aca0000,0x000000002ada0000)]
+  0x000000001c120800 JavaThread "Cache worker for Build Output Cleanup Cache (C:\Users\sebastiaorealino\Documents\PrivateProjects\OtpGen\.gradle\buildOutputCleanup)" [_thread_blocked, id=17596, stack(0x000000002aba0000,0x000000002aca0000)]
+  0x000000001c11f000 JavaThread "Cache worker for task history cache (C:\Users\sebastiaorealino\Documents\PrivateProjects\OtpGen\.gradle\4.4\taskHistory)" [_thread_blocked, id=1028, stack(0x000000002aaa0000,0x000000002aba0000)]
+  0x000000001c11d800 JavaThread "build operations Thread 8" [_thread_blocked, id=16808, stack(0x000000002a9a0000,0x000000002aaa0000)]
+  0x000000001c11f800 JavaThread "build operations Thread 7" [_thread_blocked, id=16652, stack(0x000000002a8a0000,0x000000002a9a0000)]
+  0x000000001cdf7000 JavaThread "build operations Thread 6"
