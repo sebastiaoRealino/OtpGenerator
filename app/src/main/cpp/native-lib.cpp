@@ -1,12 +1,33 @@
 #include <jni.h>
 #include <string>
+#include <stdlib.h>
+#include "otp.h"
 
-extern "C" JNIEXPORT jstring
+extern "C" JNIEXPORT jbyteArray JNICALL
+Java_com_example_sebastiaorealino_otpgen_MainActivity_generateOtp(
+        JNIEnv *env, jobject thiz, jstring key) {
 
-JNICALL
-Java_com_example_sebastiaorealino_otpgen_MainActivity_stringFromJNI(
-        JNIEnv *env,
-        jobject /* this */) {
-    std::string hello = "Hello from C++";
-    return env->NewStringUTF(hello.c_str());
+    const char *constKeyLocal = env->GetStringUTFChars(key, 0);
+    char* keyLocal = (char*)constKeyLocal;
+
+    int keysize = 32;
+
+    char* digest= (char*)malloc(20);
+    memset(digest, 0, 20);
+
+    generateotp(keyLocal,keysize,digest);
+
+    jbyte*digestLocal = (jbyte*)calloc(sizeof(jbyte), 20);
+    for(int i=0; i <= 20; i++){
+        digestLocal[i] =  (jbyte) digest[i];
+    }
+
+    jbyteArray digestByteArray = env->NewByteArray(20);
+    env->SetByteArrayRegion(digestByteArray, 0, 20 , digestLocal);
+
+    free(digestLocal);
+    free(digest);
+    free(keyLocal);
+
+    return digestByteArray;
 }
