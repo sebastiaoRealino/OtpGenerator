@@ -1,5 +1,6 @@
 package com.example.sebastiaorealino.otpgen;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
@@ -9,6 +10,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.google.gson.Gson;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+import com.mvvm.data.model.QrCodeResponse;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -34,18 +40,41 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                generateOTP();
+                scanQrCode();
             }
         });
 
-        generateOTP();
-
     }
-    public void generateOTP(){
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+            IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+        if (scanResult != null) {
+                TextView t = (TextView) findViewById(R.id.sample_text);
+                String data[] =scanResult.getContents().split("\n");
+                 Log.d("KEY data[]", data[0]);
+            Gson gson = new Gson();
+            QrCodeResponse qrcodeResult = gson.fromJson(data[0], QrCodeResponse.class);
+            Log.d("testModel", qrcodeResult.getKey());
+            Log.d("testModel", qrcodeResult.getLabel());
+            generateOTP(qrcodeResult.getKey());
+
+        }
+    }
+
+    private void scanQrCode(){
+        IntentIntegrator integrator = new IntentIntegrator(this);
+        integrator.setPrompt("Scan a barcode");
+        integrator.setCameraId(0);  // Use a specific camera of the device
+        integrator.setBeepEnabled(false);
+        integrator.initiateScan();
+    }
+
+    public void generateOTP(String key){
+
         // Example of a call to a native method
         TextView tv = (TextView) findViewById(R.id.sample_text);
 
-        byte[] otpByte = generateOtp("QYDVQQLEwpUZWNoIERlcHQuMSgwJgYDV");
+        byte[] otpByte = generateOtp(key);
         byte[] byteRange = Arrays.copyOfRange(otpByte, 10, 14);
 
         String hexValue = truncateWhenUTF8("0x"+toHexString(byteRange),31);
