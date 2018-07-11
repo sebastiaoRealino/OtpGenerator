@@ -14,24 +14,21 @@ import android.view.MenuItem;
 import com.google.gson.Gson;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-import com.mvvm.data.model.QrCodeResponse;
-
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Formatter;
+import com.mvvm.data.model.QRCodeResponse;
+import com.mvvm.utils.OtpGenerator;
 
 public class MainActivity extends AppCompatActivity {
 
-    // Used to load the 'native-lib' library on application startup.
     static {
         System.loadLibrary("native-lib");
     }
 
+    OtpGenerator mOtpGenerator;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mOtpGenerator = OtpGenerator.getInstance();
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -43,25 +40,22 @@ public class MainActivity extends AppCompatActivity {
                 scanQrCode();
             }
         });
-
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-            IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+        IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (scanResult != null) {
-                TextView t = (TextView) findViewById(R.id.sample_text);
-                String data[] =scanResult.getContents().split("\n");
-                 Log.d("KEY data[]", data[0]);
+            String data[] = scanResult.getContents().split("\n");
             Gson gson = new Gson();
-            QrCodeResponse qrcodeResult = gson.fromJson(data[0], QrCodeResponse.class);
-            Log.d("testModel", qrcodeResult.getKey());
-            Log.d("testModel", qrcodeResult.getLabel());
-            generateOTP(qrcodeResult.getKey());
-
+            QRCodeResponse qrCodeResult = gson.fromJson(data[0], QRCodeResponse.class);
+            String sOTP = mOtpGenerator.generateOTP(qrCodeResult.getKey());
+            TextView tv = (TextView) findViewById(R.id.sample_text);
+            tv.setText(sOTP);
         }
     }
 
-    private void scanQrCode(){
+    private void scanQrCode() {
         IntentIntegrator integrator = new IntentIntegrator(this);
         integrator.setPrompt("Scan a barcode");
         integrator.setCameraId(0);  // Use a specific camera of the device
@@ -69,86 +63,8 @@ public class MainActivity extends AppCompatActivity {
         integrator.initiateScan();
     }
 
-    public void generateOTP(String key){
 
-        // Example of a call to a native method
-        TextView tv = (TextView) findViewById(R.id.sample_text);
 
-        byte[] otpByte = generateOtp(key);
-        byte[] byteRange = Arrays.copyOfRange(otpByte, 10, 14);
-
-        String hexValue = truncateWhenUTF8("0x"+toHexString(byteRange),31);
-
-        Log.d("OTP HEx", hexValue);
-
-        int otp = getDecimal(hexValue);
-        String fullOtp = String.valueOf(otp);
-        String sOtpGenereted = fullOtp.substring(fullOtp.length() -6, fullOtp.length());
-
-        Log.d("OTP OTP", sOtpGenereted);
-        tv.setText(sOtpGenereted);
-    }
-
-    public static int getDecimal(String hex){
-        String digits = "0123456789ABCDEF";
-        hex = hex.toUpperCase();
-        int val = 0;
-        for (int i = 0; i < hex.length(); i++)
-        {
-            char c = hex.charAt(i);
-            int d = digits.indexOf(c);
-            val = 16*val + d;
-        }
-        return val;
-    }
-
-    public static String truncateWhenUTF8(String s, int maxBytes) {
-        int b = 0;
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            int skip = 0;
-            int more;
-            if (c <= 0x007f) {
-                more = 1;
-            }
-            else if (c <= 0x07FF) {
-                more = 2;
-            } else if (c <= 0xd7ff) {
-                more = 3;
-            } else if (c <= 0xDFFF) {
-                more = 4;
-                skip = 1;
-            } else {
-                more = 3;
-            }
-            if (b + more > maxBytes) {
-                return s.substring(0, i);
-            }
-            b += more;
-            i += skip;
-        }
-        return s;
-    }
-
-    private static String toHexString(byte[] bytes) {
-        Formatter formatter = new Formatter();
-
-        for (byte b : bytes) {
-            formatter.format("%02x", b);
-        }
-
-        return formatter.toString();
-    }
-    public static int truncateUtf8(String input, byte[] output) {
-
-        ByteBuffer outBuf = ByteBuffer.wrap(output);
-        CharBuffer inBuf = CharBuffer.wrap(input.toCharArray());
-
-        Charset utf8 = Charset.forName("UTF-8");
-        utf8.newEncoder().encode(inBuf, outBuf, true);
-        System.out.println("encoded " + inBuf.position() + " chars of " + input.length() + ", result: " + outBuf.position() + " bytes");
-        return outBuf.position();
-    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -171,9 +87,5 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
-    public native byte[] generateOtp(String key);
+
 }

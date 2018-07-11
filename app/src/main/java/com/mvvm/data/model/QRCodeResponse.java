@@ -1,6 +1,6 @@
 package com.mvvm.data.model;
 
-public class QrCodeResponse {
+public class QRCodeResponse {
     private String key;
     private String label;
 

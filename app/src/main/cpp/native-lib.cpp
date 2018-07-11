@@ -4,7 +4,7 @@
 #include "otp.h"
 
 extern "C" JNIEXPORT jbyteArray JNICALL
-Java_com_example_sebastiaorealino_otpgen_MainActivity_generateOtp(
+Java_com_mvvm_utils_OtpGenerator_generateOtp(
         JNIEnv *env, jobject thiz, jstring key) {
 
     const char *constKeyLocal = env->GetStringUTFChars(key, 0);
