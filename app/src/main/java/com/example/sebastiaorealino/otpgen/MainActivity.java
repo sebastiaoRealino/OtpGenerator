@@ -1,5 +1,6 @@
 package com.example.sebastiaorealino.otpgen;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,6 +18,12 @@ import com.google.zxing.integration.android.IntentResult;
 import com.mvvm.data.model.QRCodeResponse;
 import com.mvvm.utils.OtpGenerator;
 
+import junit.framework.Assert;
+
+import io.reactivex.Flowable;
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
+
 public class MainActivity extends AppCompatActivity {
 
     static {
@@ -24,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     OtpGenerator mOtpGenerator;
+    QRCodeResponse mQRCodeResponse;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,11 +56,36 @@ public class MainActivity extends AppCompatActivity {
         if (scanResult != null) {
             String data[] = scanResult.getContents().split("\n");
             Gson gson = new Gson();
-            QRCodeResponse qrCodeResult = gson.fromJson(data[0], QRCodeResponse.class);
-            String sOTP = mOtpGenerator.generateOTP(qrCodeResult.getKey());
-            TextView tv = (TextView) findViewById(R.id.sample_text);
-            tv.setText(sOTP);
+            mQRCodeResponse = gson.fromJson(data[0], QRCodeResponse.class);
+            createTask();
         }
+    }
+
+    @SuppressLint("CheckResult")
+    private void createTask() {
+        Observable.create(emitter -> {
+            String sOTP = mOtpGenerator.generateOTP(mQRCodeResponse.getKey());
+            emitter.onNext(sOTP);
+        }).subscribe((response) -> {
+
+            TextView tv = (TextView) findViewById(R.id.sample_text);
+            tv.setText(response.toString());
+            Log.d("TASK", response.toString());
+            Log.d("TASK", "DEU CERTO A TASK" + response.toString());
+        }, Throwable::printStackTrace);
+
+//        Flowable.fromCallable(() -> {
+//            Thread.sleep(1000); //  imitate expensive computation
+//            return "Done";
+//        })
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(Schedulers.single())
+//                .subscribe((response)->{
+////                    TextView tv = (TextView) findViewById(R.id.sample_text);
+////                    String sOTP = mOtpGenerator.generateOTP(mQRCodeResponse.getKey());
+////                    tv.setText(sOTP);
+//                    Log.d("TASK", "DEU CERTO A TASK" );
+//                }, Throwable::printStackTrace);
     }
 
     private void scanQrCode() {
@@ -62,7 +95,6 @@ public class MainActivity extends AppCompatActivity {
         integrator.setBeepEnabled(false);
         integrator.initiateScan();
     }
-
 
 
     @Override
