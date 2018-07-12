@@ -20,8 +20,11 @@ import com.mvvm.utils.OtpGenerator;
 
 import junit.framework.Assert;
 
+import java.util.concurrent.TimeUnit;
+
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
@@ -38,10 +41,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mOtpGenerator = OtpGenerator.getInstance();
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -63,29 +66,17 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("CheckResult")
     private void createTask() {
-        Observable.create(emitter -> {
-            String sOTP = mOtpGenerator.generateOTP(mQRCodeResponse.getKey());
-            emitter.onNext(sOTP);
-        }).subscribe((response) -> {
+        Observable obsTest = Observable
+                .interval(0,5, TimeUnit.SECONDS).map(emitter -> {
+                    Log.d("TASL", mQRCodeResponse.getKey());
+                    String sOTP = mOtpGenerator.generateOTP(mQRCodeResponse.getKey());
+                    return sOTP;
+                });
+        obsTest.subscribe((Otp) -> {
+            Log.d("TASK", Otp.toString());
+            Log.d("TASK", "DEU CERTO A TASK" + Otp.toString());
+        });
 
-            TextView tv = (TextView) findViewById(R.id.sample_text);
-            tv.setText(response.toString());
-            Log.d("TASK", response.toString());
-            Log.d("TASK", "DEU CERTO A TASK" + response.toString());
-        }, Throwable::printStackTrace);
-
-//        Flowable.fromCallable(() -> {
-//            Thread.sleep(1000); //  imitate expensive computation
-//            return "Done";
-//        })
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(Schedulers.single())
-//                .subscribe((response)->{
-////                    TextView tv = (TextView) findViewById(R.id.sample_text);
-////                    String sOTP = mOtpGenerator.generateOTP(mQRCodeResponse.getKey());
-////                    tv.setText(sOTP);
-//                    Log.d("TASK", "DEU CERTO A TASK" );
-//                }, Throwable::printStackTrace);
     }
 
     private void scanQrCode() {
