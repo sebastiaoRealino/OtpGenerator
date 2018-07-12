@@ -3,29 +3,19 @@ package com.example.sebastiaorealino.otpgen;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.TextView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.google.gson.Gson;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.mvvm.data.model.QRCodeResponse;
 import com.mvvm.utils.OtpGenerator;
-
-import junit.framework.Assert;
-
-import java.util.concurrent.TimeUnit;
-
-import io.reactivex.Flowable;
-import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -66,13 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("CheckResult")
     private void createTask() {
-        Observable obsTest = Observable
-                .interval(0,5, TimeUnit.SECONDS).map(emitter -> {
-                    Log.d("TASL", mQRCodeResponse.getKey());
-                    String sOTP = mOtpGenerator.generateOTP(mQRCodeResponse.getKey());
-                    return sOTP;
-                });
-        obsTest.subscribe((Otp) -> {
+        mOtpGenerator.generateOtpInterval(mQRCodeResponse.getKey()).subscribe((Otp) -> {
             Log.d("TASK", Otp.toString());
             Log.d("TASK", "DEU CERTO A TASK" + Otp.toString());
         });

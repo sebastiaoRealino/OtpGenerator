@@ -4,6 +4,9 @@ import android.util.Log;
 
 import java.util.Arrays;
 import java.util.Formatter;
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Observable;
 
 public class OtpGenerator {
     private static final OtpGenerator ourInstance = new OtpGenerator();
@@ -15,9 +18,17 @@ public class OtpGenerator {
     }
 
     private OtpGenerator() {
+
     }
 
-    public String generateOTP(String key) {
+    public Observable generateOtpInterval(String key) {
+        return Observable.interval(0, 5, TimeUnit.SECONDS).map(emitter -> {
+            String sOTP = generateOTP(key);
+            return sOTP;
+        });
+    }
+
+    private String generateOTP(String key) {
 
         byte[] otpByte = generateOtp(key);
         byte[] byteRange = Arrays.copyOfRange(otpByte, 10, 14);
@@ -33,7 +44,6 @@ public class OtpGenerator {
         Log.d("OTP OTP", sOtpGenereted);
 
         return sOtpGenereted;
-
     }
 
     private static int getDecimal(String hex) {
