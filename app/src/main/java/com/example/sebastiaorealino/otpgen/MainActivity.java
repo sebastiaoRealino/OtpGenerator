@@ -17,6 +17,8 @@ import com.google.zxing.integration.android.IntentResult;
 import com.mvvm.data.model.QRCodeResponse;
 import com.mvvm.utils.OtpGenerator;
 
+import io.reactivex.Observable;
+
 public class MainActivity extends AppCompatActivity {
 
     static {
@@ -56,7 +58,8 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("CheckResult")
     private void createTask() {
-        mOtpGenerator.generateOtpInterval(mQRCodeResponse.getKey()).subscribe((Otp) -> {
+        Observable obsOtpInterval = mOtpGenerator.generateOtpInterval(mQRCodeResponse.getKey());
+        obsOtpInterval.subscribe((Otp) -> {
             Log.d("TASK", Otp.toString());
             Log.d("TASK", "DEU CERTO A TASK" + Otp.toString());
         });
