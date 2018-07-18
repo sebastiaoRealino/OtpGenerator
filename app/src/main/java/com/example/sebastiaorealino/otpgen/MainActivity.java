@@ -2,6 +2,7 @@ package com.example.sebastiaorealino.otpgen;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.example.sebastiaorealino.otpgen.databinding.ActivityMainBinding;
 import com.google.gson.Gson;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -21,6 +23,8 @@ import io.reactivex.Observable;
 
 public class MainActivity extends AppCompatActivity {
 
+    ActivityMainBinding mMainBinding;
+    private String mOtp;
     static {
         System.loadLibrary("native-lib");
     }
@@ -31,8 +35,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         mOtpGenerator = OtpGenerator.getInstance();
-        setContentView(R.layout.activity_main);
+
+        mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        mMainBinding.setOtpText(mOtp);
+        mOtp = "test";
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -60,6 +68,9 @@ public class MainActivity extends AppCompatActivity {
     private void createTask() {
         Observable obsOtpInterval = mOtpGenerator.generateOtpInterval(mQRCodeResponse.getKey());
         obsOtpInterval.subscribe((Otp) -> {
+            mOtp = Otp.toString();
+            mMainBinding.setOtpText(mOtp);
+            mOtp = "TESTE ASYNC";
             Log.d("TASK", Otp.toString());
             Log.d("TASK", "DEU CERTO A TASK" + Otp.toString());
         });

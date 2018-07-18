@@ -19,7 +19,7 @@ public class OtpGenerator {
     }
 
     public Observable generateOtpInterval(String key) {
-        return Observable.interval(0, 5, TimeUnit.SECONDS)
+        return Observable.interval(0, 10, TimeUnit.SECONDS)
                 .map(emitter -> generateOTP(key));
     }
 
