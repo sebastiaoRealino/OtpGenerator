@@ -4,10 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,6 +16,7 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.mvvm.data.model.QRCodeResponse;
 import com.mvvm.utils.OtpGenerator;
+import com.mvvm.utils.SharePref;
 
 import io.reactivex.Observable;
 
@@ -25,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
     ActivityMainBinding mMainBinding;
     private String mOtp;
+
     static {
         System.loadLibrary("native-lib");
     }
@@ -35,44 +35,43 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         mOtpGenerator = OtpGenerator.getInstance();
 
         mMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        mMainBinding.setOtpText(mOtp);
-        mOtp = "test";
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                scanQrCode();
-            }
-        });
+        mMainBinding.setIsTokenSaved(true);
+        String key = SharePref.getInstance(this).getAnyKey();
+        if (key.equals("")) {
+            mMainBinding.setIsTokenSaved(false);
+        } else {
+            mMainBinding.setIsTokenSaved(true);
+            createTask(key);
+        }
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-        if (scanResult != null) {
+        if (scanResult != null && scanResult.getContents() != null) {
             String data[] = scanResult.getContents().split("\n");
-            Gson gson = new Gson();
-            mQRCodeResponse = gson.fromJson(data[0], QRCodeResponse.class);
-            createTask();
+            if (data[0] != null) {
+                Gson gson = new Gson();
+                mQRCodeResponse = gson.fromJson(data[0], QRCodeResponse.class);
+                createTask(mQRCodeResponse.getKey());
+            }
         }
     }
 
     @SuppressLint("CheckResult")
-    private void createTask() {
-        Observable obsOtpInterval = mOtpGenerator.generateOtpInterval(mQRCodeResponse.getKey());
+    private void createTask(String key) {
+        SharePref.getInstance(this).saveKey(key);
+        Observable obsOtpInterval = mOtpGenerator.generateOtpInterval(key);
         obsOtpInterval.subscribe((Otp) -> {
             mOtp = Otp.toString();
+            mMainBinding.setIsTokenSaved(true);
             mMainBinding.setOtpText(mOtp);
-            mOtp = "TESTE ASYNC";
-            Log.d("TASK", Otp.toString());
-            Log.d("TASK", "DEU CERTO A TASK" + Otp.toString());
         });
 
     }
@@ -85,12 +84,25 @@ public class MainActivity extends AppCompatActivity {
         integrator.initiateScan();
     }
 
+    private void clearLocalStorage() {
+        SharePref.getInstance(this).clearAll();
+        mMainBinding.setIsTokenSaved(false);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    public void scanQrCodeClick(View v) {
+        scanQrCode();
+    }
+
+    public void clearLocalStorageClick(View v) {
+        clearLocalStorage();
     }
 
     @Override
@@ -107,6 +119,4 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
-
 }

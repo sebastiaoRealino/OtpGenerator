@@ -1,5 +1,7 @@
 package com.mvvm.utils;
 
+import com.mvvm.config.Constants;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Formatter;
@@ -19,7 +21,7 @@ public class OtpGenerator {
     }
 
     public Observable generateOtpInterval(String key) {
-        return Observable.interval(0, 10, TimeUnit.SECONDS)
+        return Observable.interval(0, Constants.OTP_OFTEN_GEN, TimeUnit.SECONDS)
                 .map(emitter -> generateOTP(key));
     }
 
